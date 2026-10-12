@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>শিক্ষাসাথী | Student Manager</title>
+<style>
+:root{--navy:#102542;--cream:#f7f3e8;--gold:#d6a63b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:#182638;font-family:Arial,"Noto Sans Bengali",sans-serif}
+header{background:var(--navy);color:white;padding:18px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+header h2{margin:0;font-size:21px}
+main{max-width:950px;margin:22px auto;padding:0 14px}
+.card{background:#fffefa;padding:20px;border-radius:15px;margin-bottom:16px;box-shadow:0 5px 20px #10254212}
+h1,h2,h3{margin-top:0}
+input,select,textarea{width:100%;padding:12px;margin:6px 0 13px;border:1px solid #ccd4dc;border-radius:8px;font-size:15px;background:white}
+button{padding:11px 14px;border:0;border-radius:8px;cursor:pointer;font-size:14px;font-weight:bold;margin:3px}
+.primary{background:var(--navy);color:white}
+.light{background:#e8edf2;color:var(--navy)}
+.danger{background:#ffebeb;color:#a12b2b}
+.gold{color:#8c6718}
+.tabs,.menu{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+.tabs button,.menu button{flex:1}
+.hidden{display:none!important}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.stat{background:#f1ead8;padding:14px;border-radius:10px}
+.stat strong{display:block;font-size:25px;color:var(--navy)}
+.item{padding:13px 0;border-bottom:1px solid #e4e7e9;overflow-wrap:anywhere}
+.item:last-child{border:0}
+.small{font-size:13px;color:#687789}
+#message{white-space:pre-wrap;color:#a12b2b}
+.ok{color:#18764e!important}
+label{font-size:14px;font-weight:bold}
+@media(max-width:550px){.grid{grid-template-columns:1fr}header h2{font-size:17px}.card{padding:15px}}
+</style>
+</head>
+<body>
+<header>
+  <div><h2>📘 শিক্ষাসাথী</h2><small>Institution & Student Manager</small></div>
+  <button id="logout" class="light hidden">লগআউট</button>
+</header>
+<main>
+  <section id="auth">
+    <div class="card">
+      <h1>স্বাগতম!</h1>
+      <p>আপনার প্রতিষ্ঠান ও শিক্ষার্থীদের তথ্য অনলাইনে পরিচালনা করুন।</p>
+      <div class="tabs">
+        <button class="primary" id="showLogin">লগইন</button>
+        <button class="light" id="showRegister">রেজিস্ট্রেশন</button>
+      </div>
+      <form id="loginForm">
+        <label>ইমেইল</label>
+        <input id="loginEmail" type="email" required>
+        <label>পাসওয়ার্ড</label>
+        <input id="loginPass" type="password" required>
+        <button class="primary" type="submit">লগইন করুন</button>
+        <button class="light" type="button" id="forgot">পাসওয়ার্ড ভুলে গেছেন?</button>
+      </form>
+      <form id="registerForm" class="hidden">
+        <label>আপনার নাম</label>
+        <input id="regName" required maxlength="80">
+        <label>প্রতিষ্ঠানের নাম</label>
+        <input id="regInst" required maxlength="120">
+        <label>ইমেইল</label>
+        <input id="regEmail" type="email" required>
+        <label>পাসওয়ার্ড (কমপক্ষে ৬ অক্ষর)</label>
+        <input id="regPass" type="password" minlength="6" required>
+        <button class="primary" type="submit">অ্যাকাউন্ট তৈরি করুন</button>
+      </form>
+      <p id="message"></p>
+    </div>
+  </section>
+
+  <section id="dashboard" class="hidden">
+    <div class="card">
+      <h1 id="welcome">ড্যাশবোর্ড</h1>
+      <p class="small">আপনার তথ্য আপনার অ্যাকাউন্টে সংরক্ষিত থাকবে।</p>
+      <div class="grid">
+        <div class="stat">প্রতিষ্ঠান<strong id="instCount">০</strong></div>
+        <div class="stat">শিক্ষার্থী<strong id="stuCount">০</strong></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="menu">
+        <button class="primary" data-page="home">হোম</button>
+        <button class="light" data-page="institutions">প্রতিষ্ঠান</button>
+        <button class="light" data-page="students">শিক্ষার্থী</button>
+      </div>
+      <section id="page-home">
+        <h2>দ্রুত কাজ</h2>
+        <p>প্রতিষ্ঠানের তথ্য যোগ করুন, তারপর শিক্ষার্থীর তথ্য সংরক্ষণ করুন।</p>
+        <button class="primary" data-page="institutions">প্রতিষ্ঠান পরিচালনা</button>
+        <button class="primary" data-page="students">শিক্ষার্থী পরিচালনা</button>
+      </section>
+
+      <section id="page-institutions" class="hidden">
+        <h2>প্রতিষ্ঠান পরিচালনা</h2>
+        <form id="instForm">
+          <input id="instId" type="hidden">
+          <label>প্রতিষ্ঠানের নাম *</label><input id="instName" required>
+          <label>প্রতিষ্ঠানের ধরন</label><input id="instType" placeholder="স্কুল / কলেজ / মাদ্রাসা">
+          <label>ফোন</label><input id="instPhone" type="tel">
+          <label>ইমেইল</label><input id="instEmail" type="email">
+          <label>ঠিকানা</label><textarea id="instAddress" rows="2"></textarea>
+          <button class="primary" type="submit">সংরক্ষণ</button>
+          <button class="light" type="button" id="cancelInst">বাতিল</button>
+        </form>
+        <h3>প্রতিষ্ঠানের তালিকা</h3>
+        <div id="instList"></div>
+      </section>
+
+      <section id="page-students" class="hidden">
+        <h2>শিক্ষার্থী পরিচালনা</h2>
+        <input id="search" placeholder="নাম, রোল বা শ্রেণি দিয়ে খুঁজুন">
+        <form id="stuForm">
+          <input id="stuId" type="hidden">
+          <label>শিক্ষার্থীর নাম *</label><input id="stuName" required>
+          <label>রোল</label><input id="stuRoll">
+          <label>শ্রেণি</label><input id="stuClass">
+          <label>ফোন</label><input id="stuPhone" type="tel">
+          <label>ইমেইল</label><input id="stuEmail" type="email">
+          <label>জন্মতারিখ</label><input id="stuDob" type="date">
+          <label>প্রতিষ্ঠান *</label><select id="stuInst" required></select>
+          <button class="primary" type="submit">সংরক্ষণ</button>
+          <button class="light" type="button" id="cancelStu">বাতিল</button>
+        </form>
+        <h3>শিক্ষার্থীর তালিকা</h3>
+        <div id="stuList"></div>
+      </section>
+      <p id="appMessage"></p>
+    </div>
+  </section>
+  <p class="small">শিক্ষাসাথী · নিরাপদে তথ্য পরিচালনা করুন</p>
+</main>
+
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+import {
+ getAuth,onAuthStateChanged,createUserWithEmailAndPassword,
+ signInWithEmailAndPassword,signOut,updateProfile,sendPasswordResetEmail
+} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+import {
+ getFirestore,collection,addDoc,getDocs,doc,updateDoc,deleteDoc,
+ query,where,serverTimestamp,setDoc
+} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+
+/* 先在 Firebase Console 创建项目和 Web App，
+   将下面的示例值替换成你自己的 Firebase 配置。 */
+const firebaseConfig = {
+ apiKey:"YOUR_API_KEY",
+ authDomain:"YOUR_PROJECT_ID.firebaseapp.com",
+ projectId:"YOUR_PROJECT_ID",
+ storageBucket:"YOUR_PROJECT_ID.firebasestorage.app",
+ messagingSenderId:"YOUR_MESSAGING_SENDER_ID",
+ appId:"YOUR_APP_ID"
+};
+
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getFirestore(app);
+const $=id=>document.getElementById(id);
+let user=null, institutions=[], students=[];
+
+function msg(text,success=false){
+ $("message").textContent=text;
+ $("message").className=success?"ok":"";
+}
+function appMsg(text,success=false){
+ $("appMessage").textContent=text;
+ $("appMessage").className=success?"ok":"";
+}
+function errorText(e){
+ const errors={
+ "auth/email-already-in-use":"এই ইমেইলে অ্যাকাউন্ট আছে।",
+ "auth/invalid-email":"ইমেইল সঠিক নয়।",
+ "auth/weak-password":"পাসওয়ার্ড অন্তত ৬ অক্ষরের দিন।",
+ "auth/invalid-credential":"ইমেইল বা পাসওয়ার্ড সঠিক নয়।",
+ "permission-denied":"Firebase Security Rules পরীক্ষা করুন।"
+ };
+ return errors[e.code]||e.message||"সমস্যা হয়েছে।";
+}
+function safe(v){
+ return String(v??"").replace(/[&<>"']/g,c=>({
+ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+ })[c]);
+}
+
+$("showLogin").onclick=()=>{
+ $("loginForm").classList.remove("hidden");
+ $("registerForm").classList.add("hidden");msg("");
+};
+$("showRegister").onclick=()=>{
+ $("registerForm").classList.remove("hidden");
+ $("loginForm").classList.add("hidden");msg("");
+};
+
+$("loginForm").onsubmit=async e=>{
+ e.preventDefault();msg("লগইন হচ্ছে…");
+ try{
+  await signInWithEmailAndPassword(auth,$("loginEmail").value.trim(),$("loginPass").value);
+  msg("");
+ }catch(err){msg(errorText(err));}
+};
+
+$("registerForm").onsubmit=async e=>{
+ e.preventDefault();msg("অ্যাকাউন্ট তৈরি হচ্ছে…");
+ try{
+  const name=$("regName").value.trim();
+  const inst=$("regInst").value.trim();
+  const cred=await createUserWithEmailAndPassword(
+   auth,$("regEmail").value.trim(),$("regPass").value
+  );
+  await updateProfile(cred.user,{displayName:name});
+  await setDoc(doc(db,"users",cred.user.uid),{
+   uid:cred.user.uid,name,email:cred.user.email,role:"member",
+   createdAt:serverTimestamp()
+  });
+  await addDoc(collection(db,"institutions"),{
+   ownerUid:cred.user.uid,name:inst,type:"",phone:"",
+   email:cred.user.email,address:"",createdAt:serverTimestamp()
+  });
+  msg("রেজিস্ট্রেশন সফল হয়েছে।",true);
+ }catch(err){msg(errorText(err));}
+};
+
+$("forgot").onclick=async()=>{
+ const email=$("loginEmail").value.trim();
+ if(!email){msg("আগে ইমেইল লিখুন।");return;}
+ try{
+  await sendPasswordResetEmail(auth,email);
+  msg("পাসওয়ার্ড রিসেটের ইমেইল পাঠানো হয়েছে।",true);
+ }catch(e){msg(errorText(e));}
+};
+$("logout").onclick=()=>signOut(auth);
+
+document.querySelectorAll("[data-page]").forEach(b=>{
+ b.onclick=()=>showPage(b.dataset.page);
+});
+function showPage(name){
+ ["home","institutions","students"].forEach(p=>
+  $("page-"+p).classList.toggle("hidden",p!==name)
+ );
+}
+onAuthStateChanged(auth,async u=>{
+ user=u;
+ $("auth").classList.toggle("hidden",!!u);
+ $("dashboard").classList.toggle("hidden",!u);
+ $("logout").classList.toggle("hidden",!u);
+ if(!u)return;
+ $("welcome").textContent="স্বাগতম, "+(u.displayName||u.email);
+ try{await loadData();}catch(e){appMsg(errorText(e));}
+});
+
+async function loadData(){
+ const iq=query(collection(db,"institutions"),where("ownerUid","==",user.uid));
+ const sq=query(collection(db,"students"),where("ownerUid","==",user.uid));
+ const [i,s]=await Promise.all([getDocs(iq),getDocs(sq)]);
+ institutions=i.docs.map(d=>({id:d.id,...d.data()}));
+ students=s.docs.map(d=>({id:d.id,...d.data()}));
+ $("instCount").textContent=institutions.length.toLocaleString("bn-BD");
+ $("stuCount").textContent=students.length.toLocaleString("bn-BD");
+ renderInstitutions();renderStudents();updateInstitutionSelect();
+}
+function updateInstitutionSelect(){
+ $("stuInst").innerHTML='<option value="">প্রতিষ্ঠান নির্বাচন করুন</option>'+
+ institutions.map(i=>`<option value="${safe(i.id)}">${safe(i.name)}</option>`).join("");
+}
+function renderInstitutions(){
+ $("instList").innerHTML=institutions.length?institutions.map(i=>`
+ <div class="item"><b>${safe(i.name)}</b>
+ <div class="small">${safe(i.type||"ধরন দেওয়া হয়নি")} · ${safe(i.phone||"ফোন নেই")}</div>
+ <div>${safe(i.address||"")}</div>
+ <button class="light" data-edit-i="${i.id}">সম্পাদনা</button>
+ <button class="danger" data-del-i="${i.id}">মুছুন</button></div>
+ `).join(""):"<p>কোনো প্রতিষ্ঠান নেই।</p>";
+ document.querySelectorAll("[data-edit-i]").forEach(b=>b.onclick=()=>editInst(b.dataset.editI));
+ document.querySelectorAll("[data-del-i]").forEach(b=>b.onclick=()=>removeInst(b.dataset.delI));
+}
+$("instForm").onsubmit=async e=>{
+ e.preventDefault();
+ const id=$("instId").value;
+ const data={
+  name:$("instName").value.trim(),type:$("instType").value.trim(),
+  phone:$("instPhone").value.trim(),email:$("instEmail").value.trim(),
+  address:$("instAddress").value.trim(),updatedAt:serverTimestamp()
+ };
+ try{
+  if(id)await updateDoc(doc(db,"institutions",id),data);
+  else await addDoc(collection(db,"institutions"),{...data,ownerUid:user.uid,createdAt:serverTimestamp()});
+  $("instForm").reset();$("instId").value="";await loadData();appMsg("প্রতিষ্ঠান সংরক্ষিত হয়েছে।",true);
+ }catch(e){appMsg(errorText(e));}
+};
+function editInst(id){
+ const i=institutions.find(x=>x.id===id);if(!i)return;
+ $("instId").value=id;$("instName").value=i.name||"";
+ $("instType").value=i.type||"";$("instPhone").value=i.phone||"";
+ $("instEmail").value=i.email||"";$("instAddress").value=i.address||"";
+ showPage("institutions");$("instName").focus();
+}
+async function removeInst(id){
+ if(students.some(s=>s.institutionId===id)){alert("এই প্রতিষ্ঠানে শিক্ষার্থী আছে। আগে তাদের অন্য প্রতিষ্ঠানে স্থানান্তর করুন বা মুছুন।");return;}
+ if(!confirm("প্রতিষ্ঠানটি মুছবেন?"))return;
+ try{await deleteDoc(doc(db,"institutions",id));await loadData();}
+ catch(e){appMsg(errorText(e));}
+}
+$("cancelInst").onclick=()=>{$("instForm").reset();$("instId").value="";};
+
+$("stuForm").onsubmit=async e=>{
+ e.preventDefault();
+ const id=$("stuId").value;
+ const data={
+  name:$("stuName").value.trim(),roll:$("stuRoll").value.trim(),
+  className:$("stuClass").value.trim(),phone:$("stuPhone").value.trim(),
+  email:$("stuEmail").value.trim(),dateOfBirth:$("stuDob").value,
+  institutionId:$("stuInst").value,updatedAt:serverTimestamp()
+ };
+ if(!institutions.some(i=>i.id===data.institutionId)){
+  appMsg("একটি বৈধ প্রতিষ্ঠান নির্বাচন করুন।");return;
+ }
+ try{
+  if(id)await updateDoc(doc(db,"students",id),data);
+  else await addDoc(collection(db,"students"),{...data,ownerUid:user.uid,createdAt:serverTimestamp()});
+  $("stuForm").reset();$("stuId").value="";await loadData();appMsg("শিক্ষার্থীর তথ্য সংরক্ষিত হয়েছে।",true);
+ }catch(e){appMsg(errorText(e));}
+};
+function renderStudents(){
+ const term=$("search").value.trim().toLowerCase();
+ const rows=students.filter(s=>
+  [s.name,s.roll,s.className,s.phone].some(v=>String(v||"").toLowerCase().includes(term))
+ );
+ $("stuList").innerHTML=rows.length?rows.map(s=>{
+  const inst=institutions.find(i=>i.id===s.institutionId);
+  return `<div class="item"><b>${safe(s.name)}</b>
+  <div class="small">রোল: ${safe(s.roll||"—")} · শ্রেণি: ${safe(s.className||"—")}</div>
+  <div class="small">${safe(inst?.name||"প্রতিষ্ঠান নেই")} · ${safe(s.phone||"ফোন নেই")}</div>
+  <button class="light" data-edit-s="${s.id}">সম্পাদনা</button>
+  <button class="danger" data-del-s="${s.id}">মুছুন</button></div>`;
+ }).join(""):"<p>কোনো শিক্ষার্থী পাওয়া যায়নি।</p>";
+ document.querySelectorAll("[data-edit-s]").forEach(b=>b.onclick=()=>editStudent(b.dataset.editS));
+ document.querySelectorAll("[data-del-s]").forEach(b=>b.onclick=()=>removeStudent(b.dataset.delS));
+}
+$("search").oninput=renderStudents;
+function editStudent(id){
+ const s=students.find(x=>x.id===id);if(!s)return;
+ $("stuId").value=id;$("stuName").value=s.name||"";
+ $("stuRoll").value=s.roll||"";$("stuClass").value=s.className||"";
+ $("stuPhone").value=s.phone||"";$("stuEmail").value=s.email||"";
+ $("stuDob").value=s.dateOfBirth||"";$("stuInst").value=s.institutionId||"";
+ showPage("students");$("stuName").focus();
+}
+async function removeStudent(id){
+ if(!confirm("শিক্ষার্থীর তথ্য মুছবেন?"))return;
+ try{await deleteDoc(doc(db,"students",id));await loadData();}
+ catch(e){appMsg(errorText(e));}
+}
+$("cancelStu").onclick=()=>{$("stuForm").reset();$("stuId").value="";};
+</script>
+</body>
+</html>
